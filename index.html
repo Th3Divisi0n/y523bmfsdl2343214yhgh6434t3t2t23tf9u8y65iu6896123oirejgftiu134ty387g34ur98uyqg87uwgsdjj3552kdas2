@@ -6,7 +6,7 @@
   <title>N.D.A.E.C Login</title>
   <style>
     body {
-      background-color: rgb(32,16,16);
+      background: radial-gradient(circle at top, rgb(48,24,24), rgb(16,8,8));
       color: rgb(255,239,239);
       font-family: monospace;
       display: flex;
@@ -16,18 +16,30 @@
       padding: 20px;
       min-height: 100vh;
     }
+    h1 {
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(255,239,239,.4);
+    }
     textarea, input {
-      width: 300px;
+      width: 320px;
       margin: 10px 0;
       font-family: monospace;
       font-size: 16px;
-      background: #222;
+      background: #1a1a1a;
       color: rgb(255,239,239);
       border: 1px solid #444;
-      padding: 8px;
+      border-radius: 6px;
+      padding: 10px;
+      outline: none;
+      transition: border .2s;
+    }
+    textarea:focus, input:focus {
+      border-color: rgb(255,239,239);
+      box-shadow: 0 0 6px rgba(255,239,239,.4);
     }
     textarea {
-      height: 100px;
+      height: 120px;
       resize: vertical;
     }
     button {
@@ -40,24 +52,31 @@
       border-radius: 5px;
       color: rgb(32,16,16);
       font-weight: bold;
-      transition: background 0.3s;
+      transition: transform 0.15s ease, background 0.3s ease;
     }
     button:hover {
-      background: rgb(255,239,239);
+      transform: translateY(-2px);
+      background: #fff;
     }
     #output {
       white-space: pre-wrap;
       margin-top: 20px;
-      width: 300px;
-      min-height: 50px;
-      background: #222;
-      padding: 10px;
+      width: 320px;
+      min-height: 60px;
+      background: #1a1a1a;
+      padding: 12px;
       border: 1px solid #444;
+      border-radius: 6px;
     }
     #unlockSection, #devConfirmSection, #mainSection {
       display: none;
       flex-direction: column;
       align-items: center;
+      background: rgba(0,0,0,.25);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,.5);
+      margin-top: 10px;
     }
     #unlockSection.active, #devConfirmSection.active, #mainSection.active {
       display: flex;
@@ -70,6 +89,11 @@
       font-weight: bold;
       align-self: flex-start;
     }
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      opacity: .7;
+    }
   </style>
 </head>
 <body>
@@ -79,10 +103,10 @@
   <!-- Normal Unlock -->
   <div id="unlockSection" class="active">
     <label for="usernameInput">Username :</label>
-    <input type="text" id="usernameInput" placeholder="Enter username..." value="" />
+    <input type="text" id="usernameInput" placeholder="Enter username..." />
     <input type="password" id="unlockInput" placeholder="Enter unlock code..." />
     <button id="unlockBtn">Unlock</button>
-    <div id="unlockStatus" style="color: red; margin-top: 10px;"></div>
+    <div id="unlockStatus" style="color: red; margin-top: 10px; font-size: 14px;"></div>
   </div>
 
   <!-- Developer Confirm -->
@@ -101,8 +125,12 @@
       <button id="encodeBtn">Encode</button>
       <button id="decodeBtn">Decode</button>
     </div>
-    <div id="output" placeholder="Output will appear here..."></div>
+    <div id="output"></div>
   </div>
+
+  <footer>
+    <p>© <span id="year"></span> N.D.A.E.C • Secure Tools</p>
+  </footer>
 
   <script>
     // Base64-encoded unlock codes
@@ -159,7 +187,6 @@
     };
 
     yesBtn.onclick = () => {
-      // Redirect developer to devconsole page
       window.location.href = "/y523bmfsdl2343214yhgh6434t3t2t23tf9u8y65iu6896123oirejgftiu134ty387g34ur98uyqg87uwgsdjj3552kdas2/41xg3jkl351jskljfsdkl34t2sfg.html";
     };
 
@@ -199,6 +226,8 @@
       const decoded = tokens.map(tok => shifted_secret_to_english[tok] || tok).join("");
       outputDiv.textContent = decoded;
     };
+
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 
 </body>
