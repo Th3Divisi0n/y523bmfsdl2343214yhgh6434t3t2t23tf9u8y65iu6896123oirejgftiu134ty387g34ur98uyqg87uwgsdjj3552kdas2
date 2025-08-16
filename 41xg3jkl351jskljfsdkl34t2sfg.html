@@ -2,138 +2,216 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Developer Console</title>
+  <title>NDAEC Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      background: rgb(32,16,16);
-      color: rgb(255,239,239);
+      margin: 0;
       font-family: monospace;
+      background: #1a1a1a;
+      color: #eee;
+      height: 100vh;
       display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #loginScreen, #adminPanel {
+      background: rgba(30,30,30,0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(255,0,0,0.4);
+      display: none;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
-      min-height: 100vh;
+    }
+    #loginScreen.active, #adminPanel.active {
+      display: flex;
     }
     input, button, textarea {
-      font-family: monospace;
-      margin: 10px 0;
-      padding: 8px;
-      width: 300px;
+      margin: 8px 0;
+      padding: 10px;
       border: 1px solid #ff4444;
-      border-radius: 4px;
-      background: #330000;
+      border-radius: 6px;
+      background: #2a2a2a;
       color: #fff;
-    }
-    textarea {
-      height: 200px;
-      resize: vertical;
+      width: 280px;
     }
     button {
       cursor: pointer;
       background: #ff4444;
       border: none;
       font-weight: bold;
-      transition: background 0.3s ease;
+      transition: 0.3s;
     }
     button:hover {
       background: #cc0000;
     }
-    a {
-      color: #00ffff;
-      margin-top: 10px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    #dashboard {
-      width: 100%;
-      max-width: 650px;
-      margin-top: 20px;
-      display: none;
+    #sidebar {
+      width: 200px;
+      background: #111;
+      height: 100vh;
+      display: flex;
       flex-direction: column;
-      align-items: center;
+      padding: 20px;
     }
-    #status {
+    #sidebar h2 {
+      margin-bottom: 20px;
+      color: #ff4444;
+    }
+    #sidebar button {
+      background: none;
+      border: none;
+      color: #eee;
+      text-align: left;
+      padding: 10px 0;
+      cursor: pointer;
+    }
+    #sidebar button:hover {
+      color: #ff4444;
+    }
+    #content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    #adminPanel {
+      flex-direction: row;
+      width: 90%;
+      height: 90%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 10px;
-      min-height: 20px;
-      font-weight: bold;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #222;
+      color: #ff4444;
     }
   </style>
 </head>
 <body>
 
-  <h1>N.D.A.E.C Developer Login</h1>
-  <input id="devUsername" placeholder="Developer Username" autocomplete="off" />
-  <input id="devCode" type="password" placeholder="Developer Code" autocomplete="off" />
-  <button id="loginBtn">Login</button>
-
-  <div id="dashboard">
-    <h2>Welcome Subspace</h2>
-
-    <!-- External Links -->
-    <a href="https://discord.gg/542Hn53EZ7" target="_blank">Join Discord</a>
-    <a href="https://c0127bf2-57e5-45d4-bfba-3043ae63050d-00-1jlsgzcv2qwlo.worf.replit.dev" target="_blank">Go to Replit Backend</a>
-    <a href="https://replit.com/@The-Faith-Famil/MortifiedTinyWearable#ip_log.txt" target="_blank">🟡 RUN FIRST</a>
-
-    <!-- Log Editor -->
-    <textarea id="logEditor" placeholder="Edit logs here..."></textarea>
-
-    <!-- File Controls -->
-    <div>
-      <button id="downloadBtn">💾 Download Logs</button>
-      <button id="importBtn">📂 Import Logs</button>
-      <input type="file" id="fileInput" accept=".txt" style="display: none;" />
-      <button id="logoutBtn">Logout</button>
-    </div>
-
+  <!-- Login Screen -->
+  <div id="loginScreen" class="active">
+    <h1>N.D.A.E.C Admin Login</h1>
+    <input id="devUsername" placeholder="Username" autocomplete="off" />
+    <input id="devCode" type="password" placeholder="Code" autocomplete="off" />
+    <button id="loginBtn">Login</button>
     <div id="status"></div>
   </div>
 
+  <!-- Admin Panel -->
+  <div id="adminPanel">
+    <div id="sidebar">
+      <h2>Admin</h2>
+      <button onclick="showTab('dashboardTab')">Dashboard</button>
+      <button onclick="showTab('logsTab')">Logs</button>
+      <button onclick="showTab('linksTab')">Links</button>
+      <button onclick="showTab('systemTab')">System Status</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+    <div id="content">
+      <!-- Dashboard -->
+      <div id="dashboardTab" class="tab">
+        <h2>Welcome, Subspace</h2>
+        <canvas id="systemChart" height="100"></canvas>
+        <h3>Recent Activity</h3>
+        <table>
+          <tr><th>Time</th><th>Action</th><th>User</th></tr>
+          <tr><td>10:24</td><td>Login</td><td>Subspace</td></tr>
+          <tr><td>10:30</td><td>Edited Logs</td><td>Subspace</td></tr>
+        </table>
+      </div>
+
+      <!-- Logs -->
+      <div id="logsTab" class="tab" style="display:none;">
+        <h2>Logs</h2>
+        <textarea id="logEditor" placeholder="Edit logs here..."></textarea>
+        <div>
+          <button id="downloadBtn">💾 Download Logs</button>
+          <button id="importBtn">📂 Import Logs</button>
+          <input type="file" id="fileInput" accept=".txt" style="display: none;" />
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div id="linksTab" class="tab" style="display:none;">
+        <h2>Quick Links</h2>
+        <a href="https://discord.gg/542Hn53EZ7" target="_blank">Discord</a><br>
+        <a href="https://replit.com/@The-Faith-Famil/MortifiedTinyWearable" target="_blank">Replit Project</a>
+      </div>
+
+      <!-- System Status -->
+      <div id="systemTab" class="tab" style="display:none;">
+        <h2>System Status</h2>
+        <table>
+          <tr><th>Service</th><th>Status</th></tr>
+          <tr><td>Auth Server</td><td>🟢 Online</td></tr>
+          <tr><td>Database</td><td>🟡 Slow</td></tr>
+          <tr><td>API</td><td>🔴 Offline</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Developer credentials encoded
     const allowedDevEncrypted = btoa("Subspace");
     const devCodeValue = atob("NjVpdGMzNmZzNjFnZGZzNA==");
 
+    const loginScreen = document.getElementById("loginScreen");
+    const adminPanel = document.getElementById("adminPanel");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
     const usernameInput = document.getElementById("devUsername");
     const codeInput = document.getElementById("devCode");
-    const loginBtn = document.getElementById("loginBtn");
-    const dashboard = document.getElementById("dashboard");
-    const logEditor = document.getElementById("logEditor");
-    const logoutBtn = document.getElementById("logoutBtn");
     const statusDiv = document.getElementById("status");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const importBtn = document.getElementById("importBtn");
-    const fileInput = document.getElementById("fileInput");
+    const logEditor = document.getElementById("logEditor");
 
-    function encryptUsername(username) {
-      return btoa(username.trim());
+    // Tabs
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+      document.getElementById(tabId).style.display = "block";
     }
 
+    // Login
     loginBtn.onclick = () => {
       statusDiv.style.color = "red";
       statusDiv.textContent = "";
-      const encUser = encryptUsername(usernameInput.value);
+      const encUser = btoa(usernameInput.value.trim());
       if (encUser !== allowedDevEncrypted) {
-        statusDiv.textContent = "Invalid developer username.";
+        statusDiv.textContent = "Invalid username.";
         return;
       }
       if (codeInput.value !== devCodeValue) {
-        statusDiv.textContent = "Incorrect developer code.";
+        statusDiv.textContent = "Incorrect code.";
         return;
       }
-
-      loginBtn.style.display = "none";
-      usernameInput.style.display = "none";
-      codeInput.style.display = "none";
-      dashboard.style.display = "flex";
-      statusDiv.style.color = "lightgreen";
-      statusDiv.textContent = "Access granted.";
+      loginScreen.classList.remove("active");
+      adminPanel.classList.add("active");
+      showTab('dashboardTab');
     };
 
-    // Download logs as .txt
-    downloadBtn.onclick = () => {
+    // Logout
+    logoutBtn.onclick = () => {
+      adminPanel.classList.remove("active");
+      loginScreen.classList.add("active");
+      usernameInput.value = "";
+      codeInput.value = "";
+      logEditor.value = "";
+    };
+
+    // Logs persistence
+    logEditor.value = localStorage.getItem("logs") || "";
+    logEditor.oninput = () => localStorage.setItem("logs", logEditor.value);
+
+    // Download logs
+    document.getElementById("downloadBtn").onclick = () => {
       const blob = new Blob([logEditor.value], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -141,40 +219,40 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      statusDiv.style.color = "lightgreen";
-      statusDiv.textContent = "Log file downloaded.";
     };
 
-    // Trigger file input for importing logs
-    importBtn.onclick = () => {
-      fileInput.click();
-    };
-
-    // Load file content into editor
+    // Import logs
+    const fileInput = document.getElementById("fileInput");
+    document.getElementById("importBtn").onclick = () => fileInput.click();
     fileInput.onchange = () => {
       const file = fileInput.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = e => {
         logEditor.value = e.target.result;
-        statusDiv.style.color = "lightgreen";
-        statusDiv.textContent = `Loaded file: ${file.name}`;
+        localStorage.setItem("logs", logEditor.value);
       };
       reader.readAsText(file);
     };
 
-    logoutBtn.onclick = () => {
-      dashboard.style.display = "none";
-      loginBtn.style.display = "block";
-      usernameInput.style.display = "block";
-      codeInput.style.display = "block";
-      usernameInput.value = "";
-      codeInput.value = "";
-      logEditor.value = "";
-      statusDiv.textContent = "";
-      statusDiv.style.color = "red";
-    };
+    // Chart.js
+    new Chart(document.getElementById("systemChart"), {
+      type: 'line',
+      data: {
+        labels: ["10:00","10:10","10:20","10:30","10:40"],
+        datasets: [{
+          label: "System Load %",
+          data: [30, 55, 40, 70, 60],
+          borderColor: "#ff4444",
+          backgroundColor: "rgba(255,68,68,0.2)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true, max: 100 } }
+      }
+    });
   </script>
 
 </body>
