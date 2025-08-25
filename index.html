@@ -132,25 +132,24 @@
     <p>© <span id="year"></span> N.D.A.E.C • Secure Tools</p>
   </footer>
 
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script>
-    // Base64-encoded unlock codes
-    const userCodeEnc = "NjQ2NDE3NTkzNzk4MTc5ODM0NzkyMzc5ODY3OTMyNzk4NjM=";
-
-    // Base64-only encoded usernames
-    const allowedUsersEncrypted = [
-      btoa("Th3Divisi0n"),
-      btoa("Danner")
-    ];
-
-    function encryptUsername(username) {
-      return btoa(username.trim());
-    }
-
-    function decodeBase64(str) {
-      return atob(str);
-    }
-
-    const userCode = decodeBase64(userCodeEnc);
+    // TODO: Replace with your Firebase project config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAyq042U6Traj-tSPXcilFIp4kqHFhFsCo",
+    authDomain: "ndaecuserlogin.firebaseapp.com",
+    projectId: "ndaecuserlogin",
+    storageBucket: "ndaecuserlogin.firebasestorage.app",
+    messagingSenderId: "1089090034673",
+    appId: "1:1089090034673:web:62f99c99cf0ffa793d8250"
+  };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
     const unlockSection = document.getElementById("unlockSection");
     const devConfirmSection = document.getElementById("devConfirmSection");
@@ -169,21 +168,31 @@
     const encodeBtn = document.getElementById("encodeBtn");
     const decodeBtn = document.getElementById("decodeBtn");
 
-    unlockBtn.onclick = () => {
-      const inputUserEnc = encryptUsername(usernameInput.value);
-      if (!allowedUsersEncrypted.includes(inputUserEnc)) {
-        unlockStatus.textContent = "Invalid username.";
+    // Example: Check username/code against Firestore (users collection)
+    unlockBtn.onclick = async () => {
+      const username = usernameInput.value.trim();
+      const code = unlockInput.value;
+      if (!username || !code) {
+        unlockStatus.textContent = "Please enter username and code.";
         return;
       }
-      if (unlockInput.value !== userCode) {
-        unlockStatus.textContent = "Incorrect code. Access denied.";
-        unlockInput.disabled = true;
-        unlockBtn.disabled = true;
-        return;
+      unlockStatus.textContent = "Checking...";
+      try {
+        // Example: users stored as { username: <string>, code: <string> }
+        const q = await db.collection("users")
+          .where("username", "==", username)
+          .where("code", "==", code)
+          .get();
+        if (q.empty) {
+          unlockStatus.textContent = "Invalid username or code.";
+          return;
+        }
+        unlockSection.classList.remove("active");
+        devConfirmSection.classList.add("active");
+        unlockStatus.textContent = "";
+      } catch (e) {
+        unlockStatus.textContent = "Server error. Try again.";
       }
-      unlockSection.classList.remove("active");
-      devConfirmSection.classList.add("active");
-      unlockStatus.textContent = "";
     };
 
     yesBtn.onclick = () => {
@@ -195,7 +204,7 @@
       mainSection.classList.add("active");
     };
 
-    // Encoder/Decoder logic
+    // Encoder/Decoder logic (unchanged)
     const Secret_alphabet = [
       "1", "2", "6", "5", "7", "8", "9", "3", "11", "4", "10", "15",
       "13", "14", "12", "18", "16", "19", "17", "20", "22", "21", "24",
